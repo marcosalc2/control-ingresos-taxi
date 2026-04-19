@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ingresos Taxi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --surface: #161920;
+      --surface2: #1e2230;
+      --border: #2a2f3f;
+      --accent: #f5c542;
+      --accent2: #3ecf8e;
+      --accent3: #e05c5c;
+      --text: #eaedf5;
+      --muted: #6b7280;
+      --cabify: #8b5cf6;
+      --freenow: #f97316;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 6px;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* Secciones de entrada */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .card-title {
+      font-size: 0.7rem;
+      font-family: 'DM Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title::before {
+      content: '';
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .card-title.cabify::before { background: var(--cabify); }
+    .card-title.freenow::before { background: var(--freenow); }
+    .card-title.ptv::before { background: var(--accent2); }
+
+    .fields {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 5px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 1rem;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(245,197,66,0.12);
+    }
+
+    /* Resultados */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s;
+    }
+
+    .result-card:hover { transform: translateY(-2px); }
+
+    .result-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 14px 14px 0 0;
+    }
+
+    .result-card.green::after  { background: var(--accent2); }
+    .result-card.red::after    { background: var(--accent3); }
+    .result-card.purple::after { background: var(--cabify); }
+    .result-card.orange::after { background: var(--freenow); }
+
+    .result-label {
+      font-size: 0.65rem;
+      font-family: 'DM Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .result-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--accent);
+    }
+
+    .result-card.green  .result-value { color: var(--accent2); }
+    .result-card.red    .result-value { color: var(--accent3); }
+    .result-card.purple .result-value { color: var(--cabify); }
+    .result-card.orange .result-value { color: var(--freenow); }
+
+    .result-formula {
+      font-size: 0.62rem;
+      font-family: 'DM Mono', monospace;
+      color: var(--muted);
+      margin-top: 4px;
+      opacity: 0.7;
+    }
+
+    /* Botones */
+    .actions {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 24px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    button:active { transform: scale(0.97); }
+    button:hover  { opacity: 0.88; }
+
+    .btn-save {
+      background: var(--accent);
+      color: #0d0f14;
+      flex: 1;
+    }
+
+    .btn-clear {
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-family: 'DM Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      max-width: 860px;
+      margin: 0 auto 8px;
+      padding-left: 4px;
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--accent2);
+      color: #0d0f14;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 10px 22px;
+      border-radius: 999px;
+      transition: transform 0.3s ease;
+      z-index: 999;
+      white-space: nowrap;
+    }
+
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* fecha */
+    .date-row {
+      max-width: 860px;
+      margin: 0 auto 8px;
+    }
+    .date-row label {
+      font-size: 0.7rem;
+      font-family: 'DM Mono', monospace;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 5px;
+    }
+    .date-row input[type="date"] {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.95rem;
+      padding: 9px 14px;
+      outline: none;
+    }
+    .date-row input[type="date"]:focus {
+      border-color: var(--accent);
+    }
+
+    /* Colorscheme para date input en dark */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.6);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🚕 Control de Ingresos</h1>
+    <p>Taxímetro · Cabify · FreeNow · PTV</p>
+  </header>
+
+  <div class="grid" style="margin-bottom:16px;">
+
+    <!-- Fecha -->
+    <div class="date-row">
+      <label>Fecha del registro</label>
+      <input type="date" id="fecha" />
+    </div>
+
+    <!-- TAXÍMETRO -->
+    <div class="card">
+      <div class="card-title">Taxímetro</div>
+      <div class="fields">
+        <div class="field">
+          <label>Taxímetro (€)</label>
+          <input type="number" id="taximetro" placeholder="0.00" step="0.01" oninput="calcular()"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- CABIFY -->
+    <div class="card">
+      <div class="card-title cabify">Cabify</div>
+      <div class="fields">
+        <div class="field">
+          <label>Ingresos Cabify (€)</label>
+          <input type="number" id="ingresos_cabify" placeholder="0.00" step="0.01" oninput="calcular()"/>
+        </div>
+        <div class="field">
+          <label>Saldo Cabify (€)</label>
+          <input type="number" id="saldo_cabify" placeholder="0.00" step="0.01" oninput="calcular()"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- FREENOW -->
+    <div class="card">
+      <div class="card-title freenow">FreeNow</div>
+      <div class="fields">
+        <div class="field">
+          <label>Ingresos FreeNow (€)</label>
+          <input type="number" id="ingresos_freenow" placeholder="0.00" step="0.01" oninput="calcular()"/>
+        </div>
+        <div class="field">
+          <label>Saldo FreeNow (€)</label>
+          <input type="number" id="saldo_freenow" placeholder="0.00" step="0.01" oninput="calcular()"/>
+        </div>
+        <div class="field">
+          <label>Taxi FreeNow (€)</label>
+          <input type="number" id="taxi_freenow" placeholder="0.00" step="0.01" oninput="calcular()"/>
+        </div>
+        <div class="field">
+          <label>Comisión FreeNow (€)</label>
+          <input type="number" id="comision_freenow" placeholder="0.00" step="0.01" oninput="calcular()"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- PTV -->
+    <div class="card">
+      <div class="card-title ptv">PTV</div>
+      <div class="fields">
+        <div class="field">
+          <label>Cobrado por PTV (€)</label>
+          <input type="number" id="ptv" placeholder="0.00" step="0.01" oninput="calcular()"/>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RESULTADOS -->
+  <div class="section-label">— Resultados calculados</div>
+  <div class="results-grid" style="margin-bottom:20px;">
+
+    <div class="result-card orange">
+      <div class="result-label">Taxímetro Real</div>
+      <div class="result-value" id="r_taximetro_real">0,00 €</div>
+      <div class="result-formula">Taxímetro − Taxi FreeNow</div>
+    </div>
+
+    <div class="result-card green">
+      <div class="result-label">Beneficios</div>
+      <div class="result-value" id="r_beneficios">0,00 €</div>
+      <div class="result-formula">Tax. Real + Saldo Cabify + Saldo FreeNow</div>
+    </div>
+
+    <div class="result-card purple">
+      <div class="result-label">Mi Parte</div>
+      <div class="result-value" id="r_mi_parte">0,00 €</div>
+      <div class="result-formula">Beneficios / 2</div>
+    </div>
+
+    <div class="result-card red">
+      <div class="result-label">Dinero del Jefe</div>
+      <div class="result-value" id="r_dinero_jefe">0,00 €</div>
+      <div class="result-formula">Saldo Cabify + Saldo FreeNow + PTV</div>
+    </div>
+
+    <div class="result-card green">
+      <div class="result-label">Mi Saldo</div>
+      <div class="result-value" id="r_mi_saldo">0,00 €</div>
+      <div class="result-formula">Dinero del Jefe − (Beneficios / 2)</div>
+    </div>
+
+  </div>
+
+  <!-- ACCIONES -->
+  <div class="actions">
+    <button class="btn-save" onclick="guardarEnSheets()">💾 Guardar en Google Sheets</button>
+    <button class="btn-clear" onclick="limpiar()">✕ Limpiar</button>
+  </div>
+
+  <div id="toast">✓ Guardado correctamente</div>
+
+  <script>
+    // Inicializar fecha de hoy
+    (function() {
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('fecha').value = hoy;
+    })();
+
+    function val(id) {
+      return parseFloat(document.getElementById(id).value) || 0;
+    }
+
+    function fmt(n) {
+      return n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+    }
+
+    function setResult(id, value) {
+      document.getElementById(id).textContent = fmt(value);
+    }
+
+    function calcular() {
+      const taximetro       = val('taximetro');
+      const saldo_cabify    = val('saldo_cabify');
+      const saldo_freenow   = val('saldo_freenow');
+      const taxi_freenow    = val('taxi_freenow');
+      const ptv             = val('ptv');
+
+      const taximetro_real  = taximetro - taxi_freenow;
+      const beneficios      = taximetro_real + saldo_cabify + saldo_freenow;
+      const mi_parte        = beneficios / 2;
+      const dinero_jefe     = saldo_cabify + saldo_freenow + ptv;
+      const mi_saldo        = dinero_jefe - mi_parte;
+
+      setResult('r_taximetro_real', taximetro_real);
+      setResult('r_beneficios',     beneficios);
+      setResult('r_mi_parte',       mi_parte);
+      setResult('r_dinero_jefe',    dinero_jefe);
+      setResult('r_mi_saldo',       mi_saldo);
+    }
+
+    function limpiar() {
+      const ids = ['taximetro','ingresos_cabify','saldo_cabify',
+                   'ingresos_freenow','saldo_freenow','taxi_freenow',
+                   'comision_freenow','ptv'];
+      ids.forEach(id => document.getElementById(id).value = '');
+      calcular();
+    }
+
+    function mostrarToast(msg, color) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.background = color || 'var(--accent2)';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function guardarEnSheets() {
+      const datos = {
+        fecha:            document.getElementById('fecha').value,
+        taximetro:        val('taximetro'),
+        ingresos_cabify:  val('ingresos_cabify'),
+        saldo_cabify:     val('saldo_cabify'),
+        ingresos_freenow: val('ingresos_freenow'),
+        saldo_freenow:    val('saldo_freenow'),
+        taxi_freenow:     val('taxi_freenow'),
+        comision_freenow: val('comision_freenow'),
+        ptv:              val('ptv'),
+        // calculados
+        taximetro_real:   val('taximetro') - val('taxi_freenow'),
+        beneficios:       (val('taximetro') - val('taxi_freenow')) + val('saldo_cabify') + val('saldo_freenow'),
+        mi_parte:         ((val('taximetro') - val('taxi_freenow')) + val('saldo_cabify') + val('saldo_freenow')) / 2,
+        dinero_jefe:      val('saldo_cabify') + val('saldo_freenow') + val('ptv'),
+        mi_saldo:         (val('saldo_cabify') + val('saldo_freenow') + val('ptv')) - (((val('taximetro') - val('taxi_freenow')) + val('saldo_cabify') + val('saldo_freenow')) / 2)
+      };
+
+      // Llamada a la función de Google Apps Script
+      google.script.run
+        .withSuccessHandler(function() {
+          mostrarToast('✓ Guardado en Sheets', 'var(--accent2)');
+        })
+        .withFailureHandler(function(err) {
+          mostrarToast('✗ Error: ' + err.message, 'var(--accent3)');
+        })
+        .guardarDatos(datos);
+    }
+  </script>
+</body>
+</html>
